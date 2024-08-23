@@ -1,7 +1,7 @@
-import 'package:dashboard_secureEyes/const/constant.dart';
-import 'package:dashboard_secureEyes/data/line_chart_data.dart';
-import 'package:dashboard_secureEyes/main.dart';
-import 'package:dashboard_secureEyes/widgets/custom_card_widget.dart';
+import 'package:dashboard_secureeyes/const/constant.dart';
+import 'package:dashboard_secureeyes/data/line_chart_data.dart';
+import 'package:dashboard_secureeyes/main.dart';
+import 'package:dashboard_secureeyes/widgets/custom_card_widget.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:mqtt_client/mqtt_client.dart';

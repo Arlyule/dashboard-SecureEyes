@@ -1,6 +1,6 @@
 {
-  "name": "dashboard_secureEyes",
-  "short_name": "dashboard_secureEyes",
+  "name": "dashboard_secureeyes",
+  "short_name": "dashboard_secureeyes",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#0175C2",

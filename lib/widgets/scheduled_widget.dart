@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:dashboard_secureEyes/data/schedule_task_data.dart';
-import 'package:dashboard_secureEyes/widgets/custom_card_widget.dart';
-import 'package:dashboard_secureEyes/main.dart';
+import 'package:dashboard_secureeyes/data/schedule_task_data.dart';
+import 'package:dashboard_secureeyes/widgets/custom_card_widget.dart';
+import 'package:dashboard_secureeyes/main.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 
 class Scheduled extends StatefulWidget {

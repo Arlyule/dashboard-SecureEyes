@@ -1,5 +1,5 @@
-import 'package:dashboard_secureEyes/model/bar_graph_model.dart';
-import 'package:dashboard_secureEyes/model/graph_model.dart';
+import 'package:dashboard_secureeyes/model/bar_graph_model.dart';
+import 'package:dashboard_secureeyes/model/graph_model.dart';
 import 'package:flutter/material.dart';
 
 class BarGraphData {

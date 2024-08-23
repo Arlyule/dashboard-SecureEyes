@@ -1,7 +1,7 @@
-import 'package:dashboard_secureEyes/util/responsive.dart';
-import 'package:dashboard_secureEyes/widgets/dashboard_widget.dart';
-import 'package:dashboard_secureEyes/widgets/side_menu_widget.dart';
-import 'package:dashboard_secureEyes/widgets/summary_widget.dart';
+import 'package:dashboard_secureeyes/util/responsive.dart';
+import 'package:dashboard_secureeyes/widgets/dashboard_widget.dart';
+import 'package:dashboard_secureeyes/widgets/side_menu_widget.dart';
+import 'package:dashboard_secureeyes/widgets/summary_widget.dart';
 import 'package:flutter/material.dart';
 
 class MainScreen extends StatelessWidget {

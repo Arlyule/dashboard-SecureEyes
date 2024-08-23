@@ -1,6 +1,6 @@
-import 'package:dashboard_secureEyes/data/bar_graph_data.dart';
-import 'package:dashboard_secureEyes/model/graph_model.dart';
-import 'package:dashboard_secureEyes/widgets/custom_card_widget.dart';
+import 'package:dashboard_secureeyes/data/bar_graph_data.dart';
+import 'package:dashboard_secureeyes/model/graph_model.dart';
+import 'package:dashboard_secureeyes/widgets/custom_card_widget.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 

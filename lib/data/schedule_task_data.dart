@@ -1,4 +1,4 @@
-import 'package:dashboard_secureEyes/model/schedule_model.dart';
+import 'package:dashboard_secureeyes/model/schedule_model.dart';
 
 class ScheduleTasksData {
   final scheduled = const [

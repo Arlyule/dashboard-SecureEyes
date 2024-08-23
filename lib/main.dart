@@ -1,5 +1,5 @@
-import 'package:dashboard_secureEyes/const/constant.dart';
-import 'package:dashboard_secureEyes/screens/main_screen.dart';
+import 'package:dashboard_secureeyes/const/constant.dart';
+import 'package:dashboard_secureeyes/screens/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';

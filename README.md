@@ -1,4 +1,4 @@
-# dashboard_secureEyes
+# dashboard_secureeyes
 
 A new Flutter project.
 

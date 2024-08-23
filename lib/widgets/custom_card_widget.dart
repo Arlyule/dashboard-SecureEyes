@@ -1,4 +1,4 @@
-import 'package:dashboard_secureEyes/const/constant.dart';
+import 'package:dashboard_secureeyes/const/constant.dart';
 import 'package:flutter/material.dart';
 
 class CustomCard extends StatelessWidget {

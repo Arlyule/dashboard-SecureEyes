@@ -1,4 +1,4 @@
-import 'package:dashboard_secureEyes/widgets/custom_card_widget.dart';
+import 'package:dashboard_secureeyes/widgets/custom_card_widget.dart';
 import 'package:flutter/material.dart';
 
 class SummaryDetails extends StatelessWidget {

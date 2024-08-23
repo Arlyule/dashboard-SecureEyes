@@ -1,5 +1,5 @@
-import 'package:dashboard_secureEyes/const/constant.dart';
-import 'package:dashboard_secureEyes/data/side_menu_data.dart';
+import 'package:dashboard_secureeyes/const/constant.dart';
+import 'package:dashboard_secureeyes/data/side_menu_data.dart';
 import 'package:flutter/material.dart';
 
 class SideMenuWidget extends StatefulWidget {

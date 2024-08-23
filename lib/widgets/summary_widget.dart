@@ -1,9 +1,9 @@
-import 'package:dashboard_secureEyes/const/constant.dart';
-import 'package:dashboard_secureEyes/widgets/scheduled_widget.dart';
+import 'package:dashboard_secureeyes/const/constant.dart';
+import 'package:dashboard_secureeyes/widgets/scheduled_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
-import 'package:dashboard_secureEyes/main.dart';
+import 'package:dashboard_secureeyes/main.dart';
 
 class SummaryWidget extends StatefulWidget {
   const SummaryWidget({super.key});
