@@ -26,16 +26,20 @@ class MyApp extends StatelessWidget {
 }
 
 class MQTTService {
-  final MqttServerClient client = MqttServerClient('broker.hivemq.com', '');
+  // Configuración del cliente MQTT
+  final MqttServerClient client = MqttServerClient('broker.hivemq.com', '')
+    ..port = 1883
+    ..logging(on: true)
+    ..keepAlivePeriod = 20
+    ..onDisconnected = onDisconnected
+    ..onConnected = onConnected
+    ..onSubscribed = onSubscribed;
 
   MQTTService() {
-    client.logging(on: true);
-    client.keepAlivePeriod = 20;
-    client.onDisconnected = onDisconnected;
-    client.onConnected = onConnected;
-    client.onSubscribed = onSubscribed;
+    client.setProtocolV311();
   }
 
+  // Método para conectar al broker MQTT
   Future<void> connect() async {
     final MqttConnectMessage connMessage = MqttConnectMessage()
         .withClientIdentifier('SecureEyes')
@@ -46,44 +50,52 @@ class MQTTService {
     client.connectionMessage = connMessage;
 
     try {
-      print('Connecting to the MQTT broker...');
+      print('Conectando al broker MQTT...');
       await client.connect();
     } catch (e) {
-      print('Exception: $e');
+      print('Excepción durante la conexión: $e');
       client.disconnect();
+      return;
     }
 
-    if (client.connectionStatus!.state == MqttConnectionState.connected) {
-      print('MQTT client connected');
+    if (client.connectionStatus?.state == MqttConnectionState.connected) {
+      print('Cliente MQTT conectado exitosamente');
     } else {
       print(
-          'ERROR: MQTT client connection failed - disconnecting, state is ${client.connectionStatus!.state}');
+          'ERROR: La conexión del cliente MQTT falló - desconectando, estado: ${client.connectionStatus?.state}');
       client.disconnect();
     }
   }
 
-  void onConnected() {
-    print('Connected to the MQTT broker');
+  // Callback al conectar exitosamente
+  static void onConnected() {
+    print('Conectado al broker MQTT');
   }
 
-  void onDisconnected() {
-    print('Disconnected from the MQTT broker');
+  // Callback al desconectar
+  static void onDisconnected() {
+    print('Desconectado del broker MQTT');
   }
 
-  void onSubscribed(String topic) {
-    print('Subscribed to the topic: $topic');
+  // Callback al suscribirse exitosamente a un tópico
+  static void onSubscribed(String topic) {
+    print('Suscrito al tópico: $topic');
   }
 
+  // Método para suscribirse a un tópico específico
   void subscribeToTopic(String topic) {
+    print('Suscribiéndose al tópico: $topic');
     client.subscribe(topic, MqttQos.atMostOnce);
   }
 
+  // Método para publicar un mensaje en un tópico
   void publishMessage(String topic, String message) {
     final builder = MqttClientPayloadBuilder();
     builder.addString(message);
     client.publishMessage(topic, MqttQos.atMostOnce, builder.payload!);
   }
 
+  // Método para obtener el stream de actualizaciones de MQTT
   Stream<List<MqttReceivedMessage<MqttMessage>>> getStream() {
     return client.updates!;
   }
