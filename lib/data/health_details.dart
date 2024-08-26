@@ -1,5 +1,4 @@
 import 'package:dashboard_secureeyes/main.dart';
-import 'package:flutter/material.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 
 class HealthDetails {
