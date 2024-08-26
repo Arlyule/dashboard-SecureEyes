@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:dashboard_secureeyes/main.dart';
+import 'package:dashboard_secureeyes/widgets/line_chart_card.dart'; // Importar el archivo que contiene LineChartCard
 
 class SummaryWidget extends StatefulWidget {
   const SummaryWidget({super.key});
@@ -83,6 +84,11 @@ class _SummaryWidgetState extends State<SummaryWidget>
     mqttService.publishMessage('SecureEyes/gauge/Servo', value.toString());
   }
 
+  void _startImageTransmission() {
+    LineChartCard.controller
+        .startImageTransmission(); // Iniciar la transmisión de imágenes
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -93,8 +99,8 @@ class _SummaryWidgetState extends State<SummaryWidget>
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
-            SizedBox(height: 20),
-            Text(
+            const SizedBox(height: 20),
+            const Text(
               'Posición de Cámara',
               style: TextStyle(
                 fontSize: 20,
@@ -102,7 +108,7 @@ class _SummaryWidgetState extends State<SummaryWidget>
                 color: Colors.white,
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             GestureDetector(
               onPanUpdate: (details) {
                 // Capturar la posición del toque y actualizar el medidor
@@ -128,7 +134,7 @@ class _SummaryWidgetState extends State<SummaryWidget>
                     showLabels: false,
                     showTicks: false,
                     radiusFactor: 0.7,
-                    axisLineStyle: AxisLineStyle(
+                    axisLineStyle: const AxisLineStyle(
                       cornerStyle: CornerStyle.bothCurve,
                       color: Colors.black12,
                       thickness: 25,
@@ -151,7 +157,7 @@ class _SummaryWidgetState extends State<SummaryWidget>
                         markerHeight: 34,
                         markerWidth: 34,
                         markerType: MarkerType.circle,
-                        color: Color(0xFF64B5F6),
+                        color: const Color(0xFF64B5F6),
                         borderWidth: 2,
                         borderColor: Colors.white54,
                       ),
@@ -163,7 +169,7 @@ class _SummaryWidgetState extends State<SummaryWidget>
                         positionFactor: 0.2,
                         widget: Text(
                           '${_animation.value.ceil()}',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 50,
                             fontWeight: FontWeight.bold,
                             color: Color(0xFF2196F3),
@@ -175,8 +181,11 @@ class _SummaryWidgetState extends State<SummaryWidget>
                 ],
               ),
             ),
-            SizedBox(height: 40),
-            Scheduled(), // Aquí se corrigió el orden de los widgets
+            const SizedBox(height: 40),
+            Scheduled(
+              onStartVideo:
+                  _startImageTransmission, // Proveer el callback necesario
+            ),
           ],
         ),
       ),

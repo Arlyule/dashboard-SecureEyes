@@ -1,6 +1,5 @@
 import 'package:dashboard_secureeyes/util/responsive.dart';
 import 'package:dashboard_secureeyes/widgets/activity_details_card.dart';
-import 'package:dashboard_secureeyes/widgets/bar_graph_widget.dart';
 import 'package:dashboard_secureeyes/widgets/header_widget.dart';
 import 'package:dashboard_secureeyes/widgets/line_chart_card.dart';
 import 'package:dashboard_secureeyes/widgets/summary_widget.dart';

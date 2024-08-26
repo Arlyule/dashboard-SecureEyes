@@ -7,6 +7,9 @@ import 'dart:typed_data'; // Importar para manejar datos binarios
 class LineChartCard extends StatefulWidget {
   const LineChartCard({super.key});
 
+  // Método para iniciar la transmisión de imágenes
+  static final LineChartCardController controller = LineChartCardController();
+
   @override
   _LineChartCardState createState() => _LineChartCardState();
 }
@@ -20,13 +23,14 @@ class _LineChartCardState extends State<LineChartCard> {
   void initState() {
     super.initState();
     mqttService = MQTTService(); // Inicializa el servicio MQTT
-    _connectAndSubscribe(); // Conecta al broker y suscríbete al tópico
+    LineChartCard.controller.startImageTransmission =
+        _connectAndSubscribe; // Vincula el método de transmisión de imágenes
   }
 
   void _connectAndSubscribe() async {
     await mqttService.connect(); // Conecta al broker MQTT
     mqttService.subscribeToTopic(
-        'secureeyes/cam_0'); // Suscribirse al tópico de imagen
+        'sistema_segureye_esp2/cam_0'); // Suscribirse al tópico de imagen
 
     mqttService.client.updates!
         .listen((List<MqttReceivedMessage<MqttMessage>> c) {
@@ -83,4 +87,9 @@ class _LineChartCardState extends State<LineChartCard> {
     mqttService.client.disconnect(); // Desconectar al salir
     super.dispose();
   }
+}
+
+class LineChartCardController {
+  late VoidCallback
+      startImageTransmission; // Callback para iniciar la transmisión de imágenes
 }

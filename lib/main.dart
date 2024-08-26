@@ -42,7 +42,7 @@ class MQTTService {
   // Método para conectar al broker MQTT
   Future<void> connect() async {
     final MqttConnectMessage connMessage = MqttConnectMessage()
-        .withClientIdentifier('SecureEyes')
+        .withClientIdentifier('sistema_segureye_esp2')
         .keepAliveFor(20)
         .startClean()
         .withWillQos(MqttQos.atMostOnce);

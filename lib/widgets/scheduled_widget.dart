@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:dashboard_secureeyes/data/schedule_task_data.dart';
 import 'package:dashboard_secureeyes/widgets/custom_card_widget.dart';
 import 'package:dashboard_secureeyes/main.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 
 class Scheduled extends StatefulWidget {
-  const Scheduled({super.key});
+  final VoidCallback
+      onStartVideo; // Callback para iniciar transmisión de imágenes
+
+  const Scheduled({super.key, required this.onStartVideo});
 
   @override
   _ScheduledState createState() => _ScheduledState();
@@ -13,7 +15,7 @@ class Scheduled extends StatefulWidget {
 
 class _ScheduledState extends State<Scheduled> {
   bool _ledStatus = false;
-  bool _buzzerStatus = false;
+  bool _videoStatus = false; // Cambio de buzzer a video
 
   late MQTTService mqttService;
 
@@ -27,8 +29,9 @@ class _ScheduledState extends State<Scheduled> {
   void _connectAndSubscribe() async {
     await mqttService.connect();
 
-    mqttService.subscribeToTopic('sensor/status/led');
-    mqttService.subscribeToTopic('sensor/status/buzzer');
+    mqttService.subscribeToTopic('sistema_segureye_esp2/led');
+    mqttService
+        .subscribeToTopic('sistema_segureye_esp2/video'); // Tópico para video
 
     mqttService.client.updates!
         .listen((List<MqttReceivedMessage<MqttMessage>> events) {
@@ -38,30 +41,35 @@ class _ScheduledState extends State<Scheduled> {
           MqttPublishPayload.bytesToStringAsString(recMessage.payload.message);
       final topic = events[0].topic;
 
-      if (topic == 'sensor/status/led') {
+      if (topic == 'sistema_segureye_esp2/led') {
         setState(() {
-          _ledStatus = payload == '1';
+          _ledStatus = payload == '{"msg": "on"}';
         });
-      } else if (topic == 'sensor/status/buzzer') {
+      } else if (topic == 'sistema_segureye_esp2/video') {
         setState(() {
-          _buzzerStatus = payload == '1';
+          _videoStatus = payload == '{"msg": "on"}';
         });
       }
     });
   }
 
   void _toggleLed(bool value) {
-    mqttService.publishMessage('sensor/control/led', value ? '1' : '0');
+    mqttService.publishMessage('sistema_segureye_esp2/led',
+        value ? '{"msg": "on"}' : '{"msg": "off"}');
   }
 
-  void _toggleBuzzer(bool value) {
-    mqttService.publishMessage('sensor/control/buzzer', value ? '1' : '0');
+  void _toggleVideo(bool value) {
+    mqttService.publishMessage('sistema_segureye_esp2/video',
+        value ? '{"msg": "on"}' : '{"msg": "off"}');
+
+    if (value) {
+      widget
+          .onStartVideo(); // Llama al callback para iniciar la transmisión de imágenes
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final data = ScheduleTasksData();
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -94,13 +102,15 @@ class _ScheduledState extends State<Scheduled> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "Buzzer",
+                    "Video", // Cambio de Buzzer a Video
                     style: const TextStyle(
                         fontSize: 12, fontWeight: FontWeight.w500),
                   ),
                   Switch(
-                    value: _buzzerStatus,
-                    onChanged: _toggleBuzzer,
+                    value:
+                        _videoStatus, // Cambio de _buzzerStatus a _videoStatus
+                    onChanged:
+                        _toggleVideo, // Cambio de _toggleBuzzer a _toggleVideo
                     activeColor: Colors.green,
                   ),
                 ],
