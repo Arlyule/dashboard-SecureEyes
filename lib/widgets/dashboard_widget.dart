@@ -16,14 +16,10 @@ class DashboardWidget extends StatelessWidget {
         child: Column(
           children: [
             const SizedBox(height: 18),
-            const HeaderWidget(),
-            const SizedBox(height: 18),
             const ActivityDetailsCard(),
             const SizedBox(height: 18),
             const LineChartCard(),
             const SizedBox(height: 18),
-            const SizedBox(height: 18),
-            if (Responsive.isTablet(context)) const SummaryWidget(),
           ],
         ),
       ),

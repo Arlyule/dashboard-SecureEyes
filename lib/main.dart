@@ -99,4 +99,10 @@ class MQTTService {
   Stream<List<MqttReceivedMessage<MqttMessage>>> getStream() {
     return client.updates!;
   }
+
+  // Método para desuscribirse de un tópico específico
+  void unsubscribeFromTopic(String topic) {
+    print('Desuscribiéndose del tópico: $topic');
+    client.unsubscribe(topic);
+  }
 }

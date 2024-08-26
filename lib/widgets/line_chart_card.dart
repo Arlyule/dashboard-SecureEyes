@@ -61,11 +61,16 @@ class _LineChartCardState extends State<LineChartCard> {
               ),
               const SizedBox(height: 20),
               imageData != null
-                  ? Image.memory(
-                      imageData!,
-                      fit: BoxFit.cover,
-                      height: 200, // Ajusta el tamaño según necesites
-                      width: double.infinity,
+                  ? Transform(
+                      alignment: Alignment.center,
+                      transform: Matrix4.rotationX(
+                          3.14159), // Rotación de 180 grados en el eje X
+                      child: Image.memory(
+                        imageData!,
+                        fit: BoxFit.cover,
+                        height: 200, // Ajusta el tamaño según necesites
+                        width: double.infinity,
+                      ),
                     )
                   : const SizedBox(
                       height: 200,

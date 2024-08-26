@@ -12,12 +12,6 @@ class MainScreen extends StatelessWidget {
     final isDesktop = Responsive.isDesktop(context);
 
     return Scaffold(
-      drawer: !isDesktop
-          ? const SizedBox(
-              width: 250,
-              child: SideMenuWidget(),
-            )
-          : null,
       endDrawer: Responsive.isMobile(context)
           ? SizedBox(
               width: MediaQuery.of(context).size.width * 0.8,
@@ -29,15 +23,9 @@ class MainScreen extends StatelessWidget {
           children: [
             if (isDesktop)
               Expanded(
-                flex: 2,
-                child: SizedBox(
-                  child: SideMenuWidget(),
-                ),
+                flex: 7,
+                child: DashboardWidget(),
               ),
-            Expanded(
-              flex: 7,
-              child: DashboardWidget(),
-            ),
             if (isDesktop)
               Expanded(
                 flex: 3,

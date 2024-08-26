@@ -5,17 +5,17 @@ class HealthDetails {
   final MQTTService mqttService = MQTTService(); // Instancia del servicio MQTT
 
   HealthDetails() {
-    _connectAndSubscribe();
+    // _connectAndSubscribe();
   }
 
   void _connectAndSubscribe() async {
     await mqttService.connect(); // Conectar al broker MQTT
 
     // Suscribirse a los tópicos para recibir datos
-    mqttService.subscribeToTopic('sensor/luz');
-    mqttService.subscribeToTopic('sensor/led');
-    mqttService.subscribeToTopic('sensor/microfono');
-    mqttService.subscribeToTopic('sensor/pir');
+    mqttService.subscribeToTopic('sistema_segureye_esp2/luz');
+    mqttService.subscribeToTopic('sistema_segureye_esp2/led');
+    mqttService.subscribeToTopic('sistema_segureye_esp2/microfono');
+    mqttService.subscribeToTopic('sistema_segureye_esp2/pir');
 
     mqttService.client.updates!
         .listen((List<MqttReceivedMessage<MqttMessage>> events) {
@@ -26,13 +26,13 @@ class HealthDetails {
       final topic = events[0].topic;
 
       // Actualizar los valores según el tópico recibido
-      if (topic == 'sensor/luz') {
+      if (topic == 'sistema_segureye_esp2/luz') {
         _luzValue = payload;
-      } else if (topic == 'sensor/led') {
+      } else if (topic == 'sistema_segureye_esp2/led') {
         _ledValue = payload;
-      } else if (topic == 'sensor/microfono') {
+      } else if (topic == 'sistema_segureye_esp2/microfono') {
         _microfonoValue = payload;
-      } else if (topic == 'sensor/pir') {
+      } else if (topic == 'sistema_segureye_esp2/pir') {
         _pirValue = payload;
       }
     });

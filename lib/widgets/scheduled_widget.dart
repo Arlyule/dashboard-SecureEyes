@@ -4,8 +4,7 @@ import 'package:dashboard_secureeyes/main.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 
 class Scheduled extends StatefulWidget {
-  final VoidCallback
-      onStartVideo; // Callback para iniciar transmisión de imágenes
+  final VoidCallback onStartVideo;
 
   const Scheduled({super.key, required this.onStartVideo});
 
@@ -15,7 +14,7 @@ class Scheduled extends StatefulWidget {
 
 class _ScheduledState extends State<Scheduled> {
   bool _ledStatus = false;
-  bool _videoStatus = false; // Cambio de buzzer a video
+  bool _videoStatus = false;
 
   late MQTTService mqttService;
 
@@ -30,8 +29,7 @@ class _ScheduledState extends State<Scheduled> {
     await mqttService.connect();
 
     mqttService.subscribeToTopic('sistema_segureye_esp2/led');
-    mqttService
-        .subscribeToTopic('sistema_segureye_esp2/video'); // Tópico para video
+    mqttService.subscribeToTopic('sistema_segureye_esp2/video');
 
     mqttService.client.updates!
         .listen((List<MqttReceivedMessage<MqttMessage>> events) {
@@ -63,8 +61,9 @@ class _ScheduledState extends State<Scheduled> {
         value ? '{"msg": "on"}' : '{"msg": "off"}');
 
     if (value) {
-      widget
-          .onStartVideo(); // Llama al callback para iniciar la transmisión de imágenes
+      widget.onStartVideo();
+    } else {
+      mqttService.unsubscribeFromTopic('sistema_segureye_esp2/cam_0');
     }
   }
 
@@ -102,15 +101,13 @@ class _ScheduledState extends State<Scheduled> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "Video", // Cambio de Buzzer a Video
+                    "Video",
                     style: const TextStyle(
                         fontSize: 12, fontWeight: FontWeight.w500),
                   ),
                   Switch(
-                    value:
-                        _videoStatus, // Cambio de _buzzerStatus a _videoStatus
-                    onChanged:
-                        _toggleVideo, // Cambio de _toggleBuzzer a _toggleVideo
+                    value: _videoStatus,
+                    onChanged: _toggleVideo,
                     activeColor: Colors.green,
                   ),
                 ],

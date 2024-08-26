@@ -23,8 +23,8 @@ class _SummaryWidgetState extends State<SummaryWidget>
   @override
   void initState() {
     super.initState();
-    mqttService = MQTTService(); // Inicializa el servicio MQTT
-    _connectAndSubscribe(); // Conecta al broker y suscríbete al tópico si es necesario
+    //mqttService = MQTTService(); // Inicializa el servicio MQTT
+    //_connectAndSubscribe(); // Conecta al broker y suscríbete al tópico si es necesario
 
     // Configuración de la animación
     _animationController = AnimationController(
@@ -48,7 +48,7 @@ class _SummaryWidgetState extends State<SummaryWidget>
     await mqttService.connect(); // Conectar al broker MQTT
 
     // Suscribirse al tópico para recibir el valor inicial
-    mqttService.subscribeToTopic('SecureEyes/gauge/Servo');
+    mqttService.subscribeToTopic('sistema_segureye_esp2/gauge/Servo');
 
     // Obtener el valor actual del medidor desde el broker MQTT
     mqttService.client.updates!
@@ -81,7 +81,8 @@ class _SummaryWidgetState extends State<SummaryWidget>
       _animationController.forward(from: 0.0); // Reiniciar la animación
     });
     // Publicar el valor actualizado al tópico MQTT
-    mqttService.publishMessage('SecureEyes/gauge/Servo', value.toString());
+    mqttService.publishMessage(
+        'sistema_segureye_esp2/gauge/Servo', value.toString());
   }
 
   void _startImageTransmission() {
