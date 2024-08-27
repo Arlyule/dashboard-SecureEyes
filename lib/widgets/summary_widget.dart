@@ -2,7 +2,6 @@ import 'package:dashboard_secureeyes/const/constant.dart';
 import 'package:dashboard_secureeyes/widgets/scheduled_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:mqtt_client/mqtt_client.dart';
-import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:dashboard_secureeyes/main.dart';
 import 'package:dashboard_secureeyes/widgets/line_chart_card.dart'; // Importar el archivo que contiene LineChartCard
 
@@ -13,45 +12,26 @@ class SummaryWidget extends StatefulWidget {
   _SummaryWidgetState createState() => _SummaryWidgetState();
 }
 
-class _SummaryWidgetState extends State<SummaryWidget>
-    with SingleTickerProviderStateMixin {
-  double _volumeValue = 90; // Valor inicial del medidor
+class _SummaryWidgetState extends State<SummaryWidget> {
+  double _sliderValue = 90; // Valor inicial del slider
   late MQTTService mqttService; // Instancia del servicio MQTT
-  late AnimationController _animationController;
-  late Animation<double> _animation;
 
   @override
   void initState() {
     super.initState();
-    //mqttService = MQTTService(); // Inicializa el servicio MQTT
-    //_connectAndSubscribe(); // Conecta al broker y suscríbete al tópico si es necesario
-
-    // Configuración de la animación
-    _animationController = AnimationController(
-      duration: const Duration(seconds: 2),
-      vsync: this,
-    );
-    _animation =
-        Tween<double>(begin: 0, end: _volumeValue).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOut,
-    ))
-          ..addListener(() {
-            setState(() {});
-          });
-
-    // Iniciar animación de carga
-    _animationController.forward();
+    mqttService = MQTTService(); // Inicializa el servicio MQTT
+    _connectAndSubscribe(); // Conecta al broker y suscríbete al tópico si es necesario
   }
 
   void _connectAndSubscribe() async {
     await mqttService.connect(); // Conectar al broker MQTT
 
     // Suscribirse al tópico para recibir el valor inicial
-    mqttService.subscribeToTopic('sistema_segureye_esp2/gauge/Servo');
+    mqttService.subscribeToTopic('segureye/servo');
 
-    // Obtener el valor actual del medidor desde el broker MQTT
-    mqttService.client.updates!
+    // Obtener el valor actual del slider desde el broker MQTT
+    mqttService
+        .getStream()
         .listen((List<MqttReceivedMessage<MqttMessage>> events) {
       final MqttPublishMessage recMessage =
           events[0].payload as MqttPublishMessage;
@@ -59,30 +39,17 @@ class _SummaryWidgetState extends State<SummaryWidget>
           MqttPublishPayload.bytesToStringAsString(recMessage.payload.message);
       final newValue = double.tryParse(payload) ?? 0;
       setState(() {
-        _volumeValue = newValue;
-        _animation =
-            Tween<double>(begin: 0, end: _volumeValue).animate(CurvedAnimation(
-          parent: _animationController,
-          curve: Curves.easeOut,
-        ));
-        _animationController.forward(from: 0.0); // Reiniciar la animación
+        _sliderValue = newValue;
       });
     });
   }
 
-  void _onGaugeValueChanged(double value) {
+  void _onSliderValueChanged(double value) {
     setState(() {
-      _volumeValue = value;
-      _animation = Tween<double>(begin: _animation.value, end: _volumeValue)
-          .animate(CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeOut,
-      ));
-      _animationController.forward(from: 0.0); // Reiniciar la animación
+      _sliderValue = value;
     });
     // Publicar el valor actualizado al tópico MQTT
-    mqttService.publishMessage(
-        'sistema_segureye_esp2/gauge/Servo', value.toString());
+    mqttService.publishMessage('segureye/servo', value.toString());
   }
 
   void _startImageTransmission() {
@@ -110,76 +77,21 @@ class _SummaryWidgetState extends State<SummaryWidget>
               ),
             ),
             const SizedBox(height: 20),
-            GestureDetector(
-              onPanUpdate: (details) {
-                // Capturar la posición del toque y actualizar el medidor
-                double x = details.localPosition.dx /
-                    context.size!.width *
-                    180; // Convertir posición X a valor de 0 a 180
-                double y = details.localPosition.dy /
-                    context.size!.height *
-                    180; // Convertir posición Y a valor de 0 a 180
-                double newValue =
-                    (x + y) / 2; // Promediar X y Y para obtener el nuevo valor
-                newValue = newValue.clamp(0,
-                    180); // Asegurar que el valor esté dentro del rango permitido
-
-                // Actualizar el valor del medidor
-                _onGaugeValueChanged(newValue);
-              },
-              child: SfRadialGauge(
-                axes: <RadialAxis>[
-                  RadialAxis(
-                    minimum: 0,
-                    maximum: 180,
-                    showLabels: false,
-                    showTicks: false,
-                    radiusFactor: 0.7,
-                    axisLineStyle: const AxisLineStyle(
-                      cornerStyle: CornerStyle.bothCurve,
-                      color: Colors.black12,
-                      thickness: 25,
-                    ),
-                    pointers: <GaugePointer>[
-                      RangePointer(
-                        value: _animation.value,
-                        cornerStyle: CornerStyle.bothCurve,
-                        width: 25,
-                        sizeUnit: GaugeSizeUnit.logicalPixel,
-                        gradient: const SweepGradient(
-                          colors: <Color>[Color(0xFF2196F3), Color(0xFF64B5F6)],
-                          stops: <double>[0.25, 0.75],
-                        ),
-                      ),
-                      MarkerPointer(
-                        value: _animation.value,
-                        enableDragging: true,
-                        onValueChanged: _onGaugeValueChanged,
-                        markerHeight: 34,
-                        markerWidth: 34,
-                        markerType: MarkerType.circle,
-                        color: const Color(0xFF64B5F6),
-                        borderWidth: 2,
-                        borderColor: Colors.white54,
-                      ),
-                    ],
-                    annotations: <GaugeAnnotation>[
-                      GaugeAnnotation(
-                        angle: 90,
-                        axisValue: 90,
-                        positionFactor: 0.2,
-                        widget: Text(
-                          '${_animation.value.ceil()}',
-                          style: const TextStyle(
-                            fontSize: 50,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF2196F3),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+            Slider(
+              value: _sliderValue,
+              min: 0,
+              max: 180,
+              divisions: 180,
+              onChanged: _onSliderValueChanged,
+              activeColor: Colors.blue,
+              inactiveColor: Colors.blueAccent.withOpacity(0.5),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Valor: ${_sliderValue.toStringAsFixed(0)}',
+              style: const TextStyle(
+                fontSize: 24,
+                color: Colors.white,
               ),
             ),
             const SizedBox(height: 40),
@@ -195,7 +107,6 @@ class _SummaryWidgetState extends State<SummaryWidget>
 
   @override
   void dispose() {
-    _animationController.dispose(); // Limpiar el controlador de animación
     mqttService.client.disconnect(); // Desconectar MQTT al salir
     super.dispose();
   }

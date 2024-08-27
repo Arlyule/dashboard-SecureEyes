@@ -1,48 +1,11 @@
-import 'package:dashboard_secureeyes/main.dart';
-import 'package:mqtt_client/mqtt_client.dart';
-
 class HealthDetails {
-  final MQTTService mqttService = MQTTService(); // Instancia del servicio MQTT
-
-  HealthDetails() {
-    // _connectAndSubscribe();
-  }
-
-  void _connectAndSubscribe() async {
-    await mqttService.connect(); // Conectar al broker MQTT
-
-    // Suscribirse a los tópicos para recibir datos
-    mqttService.subscribeToTopic('sistema_segureye_esp2/luz');
-    mqttService.subscribeToTopic('sistema_segureye_esp2/led');
-    mqttService.subscribeToTopic('sistema_segureye_esp2/microfono');
-    mqttService.subscribeToTopic('sistema_segureye_esp2/pir');
-
-    mqttService.client.updates!
-        .listen((List<MqttReceivedMessage<MqttMessage>> events) {
-      final MqttPublishMessage recMessage =
-          events[0].payload as MqttPublishMessage;
-      final payload =
-          MqttPublishPayload.bytesToStringAsString(recMessage.payload.message);
-      final topic = events[0].topic;
-
-      // Actualizar los valores según el tópico recibido
-      if (topic == 'sistema_segureye_esp2/luz') {
-        _luzValue = payload;
-      } else if (topic == 'sistema_segureye_esp2/led') {
-        _ledValue = payload;
-      } else if (topic == 'sistema_segureye_esp2/microfono') {
-        _microfonoValue = payload;
-      } else if (topic == 'sistema_segureye_esp2/pir') {
-        _pirValue = payload;
-      }
-    });
-  }
-
+  // Valores iniciales para los sensores y el LED
   String _luzValue = "N/A";
   String _ledValue = "N/A";
   String _microfonoValue = "N/A";
   String _pirValue = "N/A";
 
+  // Método para obtener los datos de salud en forma de lista
   List<HealthModel> get healthData => [
         HealthModel(
             icon: 'assets/icons/light_sensor.png',
@@ -61,8 +24,26 @@ class HealthDetails {
             value: _pirValue,
             title: "PIR Sensor"),
       ];
+
+  // Métodos para actualizar los valores desde otras partes de la aplicación
+  void updateLuzValue(String value) {
+    _luzValue = value;
+  }
+
+  void updateLedValue(String value) {
+    _ledValue = value;
+  }
+
+  void updateMicrofonoValue(String value) {
+    _microfonoValue = value;
+  }
+
+  void updatePirValue(String value) {
+    _pirValue = value;
+  }
 }
 
+// Clase modelo para representar los datos de salud
 class HealthModel {
   final String icon;
   final String value;

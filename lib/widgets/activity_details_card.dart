@@ -1,9 +1,10 @@
 import 'dart:io';
-import 'package:dashboard_secureeyes/data/health_details.dart';
 import 'package:dashboard_secureeyes/util/responsive.dart';
 import 'package:dashboard_secureeyes/widgets/custom_card_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sound/flutter_sound.dart'; // Para grabación de audio
+import 'package:dashboard_secureeyes/main.dart'; // Importar MQTTService
+import 'package:mqtt_client/mqtt_client.dart';
 
 class ActivityDetailsCard extends StatefulWidget {
   const ActivityDetailsCard({super.key});
@@ -15,17 +16,60 @@ class ActivityDetailsCard extends StatefulWidget {
 class _ActivityDetailsCardState extends State<ActivityDetailsCard> {
   FlutterSoundRecorder _audioRecorder = FlutterSoundRecorder();
   bool _isRecording = false;
-  final HealthDetails healthDetails =
-      HealthDetails(); // Instancia de HealthDetails
+  final MQTTService mqttService = MQTTService(); // Instancia de MQTTService
+
+  // Variables para almacenar los estados de los sensores y el LED
+  String _luzValue = "N/A";
+  String _ledValue = "N/A";
+  String _microfonoValue = "N/A";
+  String _pirValue = "N/A";
 
   @override
   void initState() {
     super.initState();
     _initAudioRecorder();
+    _setupMQTT();
   }
 
   void _initAudioRecorder() async {
     await _audioRecorder.openRecorder();
+  }
+
+  void _setupMQTT() {
+    mqttService.connect().then((_) {
+      // Suscribirse a tópicos de sensor de luz, PIR, y LED
+      mqttService.subscribeToTopic('sistema_segureye_esp2/sensor_luz');
+      mqttService.subscribeToTopic('sistema_segureye_esp2/sensor_pir');
+      mqttService.subscribeToTopic('sistema_segureye_esp2/led');
+
+      // Escuchar actualizaciones de los tópicos
+      mqttService
+          .getStream()
+          .listen((List<MqttReceivedMessage<MqttMessage>> messages) {
+        final MqttPublishMessage recMessage =
+            messages[0].payload as MqttPublishMessage;
+        final String message = MqttPublishPayload.bytesToStringAsString(
+            recMessage.payload.message);
+
+        switch (messages[0].topic) {
+          case 'sistema_segureye_esp2/sensor_luz':
+            setState(() {
+              _luzValue = message;
+            });
+            break;
+          case 'sistema_segureye_esp2/sensor_pir':
+            setState(() {
+              _pirValue = message;
+            });
+            break;
+          case 'sistema_segureye_esp2/led':
+            setState(() {
+              _ledValue = message;
+            });
+            break;
+        }
+      });
+    });
   }
 
   @override
@@ -37,7 +81,8 @@ class _ActivityDetailsCardState extends State<ActivityDetailsCard> {
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
-      itemCount: healthDetails.healthData.length,
+      itemCount:
+          5, // Número de ítems a mostrar (sensor de luz, LED, micrófono, botón de reproducir, PIR)
       shrinkWrap: true,
       physics: const ScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -46,8 +91,6 @@ class _ActivityDetailsCardState extends State<ActivityDetailsCard> {
         mainAxisSpacing: 12.0,
       ),
       itemBuilder: (context, index) {
-        final item = healthDetails.healthData[index];
-
         if (index == 0) {
           // Sensor de luz
           return CustomCard(
@@ -56,7 +99,7 @@ class _ActivityDetailsCardState extends State<ActivityDetailsCard> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Image.asset(
-                  item.value == "alto"
+                  _luzValue == "alto"
                       ? 'assets/icons/sun.png'
                       : 'assets/icons/sleep.png',
                   width: 30,
@@ -65,21 +108,19 @@ class _ActivityDetailsCardState extends State<ActivityDetailsCard> {
                 Padding(
                   padding: const EdgeInsets.only(top: 15, bottom: 4),
                   child: Text(
-                    item.value,
+                    _luzValue,
                     style: const TextStyle(
-                      fontSize: 18,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
+                        fontSize: 18,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600),
                   ),
                 ),
-                Text(
-                  item.title,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey,
-                    fontWeight: FontWeight.normal,
-                  ),
+                const Text(
+                  "Light Sensor",
+                  style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey,
+                      fontWeight: FontWeight.normal),
                 ),
               ],
             ),
@@ -91,35 +132,29 @@ class _ActivityDetailsCardState extends State<ActivityDetailsCard> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Image.asset(
-                  'assets/icons/led.png',
-                  width: 30,
-                  height: 30,
-                ),
+                Image.asset('assets/icons/led.png', width: 30, height: 30),
                 Padding(
                   padding: const EdgeInsets.only(top: 15, bottom: 4),
                   child: Text(
-                    item.value == "1" ? "Encendido" : "Apagado",
+                    _ledValue == "1" ? "Encendido" : "Apagado",
                     style: const TextStyle(
-                      fontSize: 18,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
+                        fontSize: 18,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600),
                   ),
                 ),
-                Text(
-                  item.title,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey,
-                    fontWeight: FontWeight.normal,
-                  ),
+                const Text(
+                  "LED Status",
+                  style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey,
+                      fontWeight: FontWeight.normal),
                 ),
               ],
             ),
           );
         } else if (index == 2) {
-          // Micrófono
+          // Micrófono (Grabación de audio)
           return CustomCard(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -132,6 +167,8 @@ class _ActivityDetailsCardState extends State<ActivityDetailsCard> {
                         _isRecording = true;
                       });
                       await _audioRecorder.startRecorder();
+                      mqttService.publishMessage(
+                          'segureye/control/grabar', '{"msg": "on"}');
                     }
                   },
                   onLongPressUp: () async {
@@ -141,12 +178,13 @@ class _ActivityDetailsCardState extends State<ActivityDetailsCard> {
                         _isRecording = false;
                       });
                       if (path != null) {
-                        // Enviar archivo grabado a MQTT
                         final file = File(path);
                         final fileBytes = await file.readAsBytes();
-                        healthDetails.mqttService.publishMessage(
+                        mqttService.publishMessage(
                             'sensor/microfono', fileBytes.toString());
                       }
+                      mqttService.publishMessage(
+                          'segureye/control/grabar', '{"msg": "off"}');
                     }
                   },
                   child: Container(
@@ -154,65 +192,78 @@ class _ActivityDetailsCardState extends State<ActivityDetailsCard> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          _isRecording ? Icons.stop : Icons.mic,
-                          color: Colors.white,
-                          size: 30,
-                        ),
+                        Icon(_isRecording ? Icons.stop : Icons.mic,
+                            color: Colors.white, size: 30),
                         SizedBox(height: 10),
                         Text(
                           _isRecording ? "Grabando..." : "Grabar Audio",
                           style: const TextStyle(
-                            fontSize: 15,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
+                              fontSize: 15,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600),
                         ),
                       ],
                     ),
                   ),
                 ),
-                Text(
-                  item.title,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey,
-                    fontWeight: FontWeight.normal,
-                  ),
+                const Text(
+                  "Micrófono",
+                  style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey,
+                      fontWeight: FontWeight.normal),
                 ),
               ],
             ),
           );
         } else if (index == 3) {
+          // Botón de reproducir audio
+          return CustomCard(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.play_arrow, color: Colors.white, size: 30),
+                  onPressed: () {
+                    mqttService.publishMessage(
+                        'segureye/control/reproducir', '{"msg": "on"}');
+                  },
+                ),
+                const Text(
+                  "Reproducir Audio",
+                  style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
+          );
+        } else if (index == 4) {
           // Sensor PIR
           return CustomCard(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Image.asset(
-                  'assets/icons/pir.png',
-                  width: 30,
-                  height: 30,
-                ),
+                Image.asset('assets/icons/pir.png', width: 30, height: 30),
                 Padding(
                   padding: const EdgeInsets.only(top: 15, bottom: 4),
                   child: Text(
-                    item.value == "1" ? "Objeto detectado" : "Nada",
+                    _pirValue == "1" ? "Objeto detectado" : "Nada",
                     style: const TextStyle(
-                      fontSize: 18,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
+                        fontSize: 18,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600),
                   ),
                 ),
-                Text(
-                  item.title,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey,
-                    fontWeight: FontWeight.normal,
-                  ),
+                const Text(
+                  "PIR Sensor",
+                  style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey,
+                      fontWeight: FontWeight.normal),
                 ),
               ],
             ),
@@ -224,29 +275,23 @@ class _ActivityDetailsCardState extends State<ActivityDetailsCard> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Image.asset(
-                  item.icon,
-                  width: 30,
-                  height: 30,
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 15, bottom: 4),
+                Image.asset('assets/icons/default.png', width: 30, height: 30),
+                const Padding(
+                  padding: EdgeInsets.only(top: 15, bottom: 4),
                   child: Text(
-                    item.value,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    "N/A",
+                    style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600),
                   ),
                 ),
-                Text(
-                  item.title,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey,
-                    fontWeight: FontWeight.normal,
-                  ),
+                const Text(
+                  "Not Available",
+                  style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey,
+                      fontWeight: FontWeight.normal),
                 ),
               ],
             ),
