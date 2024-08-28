@@ -38,8 +38,8 @@ class _ActivityDetailsCardState extends State<ActivityDetailsCard> {
   void _setupMQTT() async {
     await mqttService.connect();
 
-    mqttService.subscribeToTopic('sensor_data/light');
-    mqttService.subscribeToTopic('sensor_data/pir');
+    mqttService.subscribeToTopic('segureye/sensor_data/light');
+    mqttService.subscribeToTopic('segureye/sensor_data/pir');
     mqttService.subscribeToTopic('segureye/control/grabar');
     mqttService.subscribeToTopic('segureye/control/reproducir');
     mqttService.subscribeToTopic('segureye/buzzer/control');
